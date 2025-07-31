@@ -52,6 +52,13 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				news: {
+					header: 'hsl(var(--news-header))',
+					text: 'hsl(var(--news-text))',
+					subtle: 'hsl(var(--news-subtle))',
+					hover: 'hsl(var(--news-hover))',
+					shadow: 'hsl(var(--news-shadow))'
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
