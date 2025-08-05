@@ -9,7 +9,7 @@ export interface NewsArticle {
   summary: string;
   content: string;
   author: string;
-  publishedAt: string;
+  date: string;
   category: string;
   imageUrl?: string;
   readTime: number;
@@ -74,7 +74,7 @@ export const NewsCard = ({ article, onClick }: NewsCardProps) => {
         
         <div className="flex items-center justify-between">
           <span className="text-sm text-news-subtle">
-            {formatDate(article.publishedAt)}
+            {formatDate(article.date)}
           </span>
           
           <Button 

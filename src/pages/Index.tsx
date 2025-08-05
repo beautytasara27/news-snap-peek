@@ -1,29 +1,57 @@
 import { useNavigate } from "react-router-dom";
 import { NewsCard, type NewsArticle } from "@/components/NewsCard";
-import { newsArticles } from "@/data/newsData";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search, Newspaper } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import axios from "axios";
 
 const Index = () => {
   const navigate = useNavigate();
+  const [newsArticles, setNewsArticles] = useState<NewsArticle[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [loading, setLoading] = useState(true);
 
+  // Fetch articles from backend
+  useEffect(() => {
+    const fetchArticles = async () => {
+      try {
+        setLoading(true);
+        const url =
+          searchTerm.trim() !== ""
+            ? `http://localhost:5050/api/summaries/search/${encodeURIComponent(searchTerm)}`
+            : `http://localhost:5050/api/summaries`;
+
+        const response = await axios.get(url);
+        setNewsArticles(response.data);
+      } catch (err) {
+        console.error("Error fetching articles", err);
+        setNewsArticles([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchArticles();
+  }, [searchTerm]);
+
+  // Extract category list
   const categories = useMemo(() => {
-    const cats = Array.from(new Set(newsArticles.map(article => article.category)));
+    const cats = Array.from(
+      new Set(newsArticles.map(article => article.category || "General"))
+    );
     return ["All", ...cats];
-  }, []);
+  }, [newsArticles]);
 
+  // Filter by category (search is done server-side)
   const filteredArticles = useMemo(() => {
     return newsArticles.filter(article => {
-      const matchesSearch = article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           article.summary.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory = selectedCategory === "All" || article.category === selectedCategory;
-      return matchesSearch && matchesCategory;
+      const matchesCategory =
+        selectedCategory === "All" || article.category === selectedCategory;
+      return matchesCategory;
     });
-  }, [searchTerm, selectedCategory]);
+  }, [newsArticles, selectedCategory]);
 
   const handleArticleClick = (article: NewsArticle) => {
     navigate(`/article/${article.id}`);
@@ -38,7 +66,7 @@ const Index = () => {
             <Newspaper className="h-8 w-8 text-primary" />
             <h1 className="text-3xl font-bold text-news-header">NewsHub</h1>
           </div>
-          
+
           {/* Search and Filters */}
           <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
             <div className="relative flex-1 max-w-md">
@@ -50,15 +78,15 @@ const Index = () => {
                 className="pl-10 bg-background border-border/60"
               />
             </div>
-            
+
             <div className="flex gap-2 flex-wrap">
               {categories.map((category) => (
                 <Badge
                   key={category}
                   variant={selectedCategory === category ? "default" : "outline"}
                   className={`cursor-pointer transition-all duration-200 ${
-                    selectedCategory === category 
-                      ? "bg-primary text-primary-foreground" 
+                    selectedCategory === category
+                      ? "bg-primary text-primary-foreground"
                       : "hover:bg-news-hover"
                   }`}
                   onClick={() => setSelectedCategory(category)}
@@ -88,7 +116,9 @@ const Index = () => {
 
         {/* Articles Grid */}
         <section>
-          {filteredArticles.length === 0 ? (
+          {loading ? (
+            <div className="text-center py-12">Loading...</div>
+          ) : filteredArticles.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-6xl mb-4">📰</div>
               <h3 className="text-xl font-semibold text-news-header mb-2">No articles found</h3>
@@ -98,13 +128,15 @@ const Index = () => {
             <>
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-2xl font-semibold text-news-header">
-                  {selectedCategory === "All" ? "Latest Articles" : `${selectedCategory} News`}
+                  {selectedCategory === "All"
+                    ? "Latest Articles"
+                    : `${selectedCategory} News`}
                 </h3>
                 <span className="text-news-subtle">
-                  {filteredArticles.length} article{filteredArticles.length !== 1 ? 's' : ''}
+                  {filteredArticles.length} article{filteredArticles.length !== 1 ? "s" : ""}
                 </span>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredArticles.map((article) => (
                   <NewsCard
