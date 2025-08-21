@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NewsDetail from "./pages/NewsDetail";
 import NotFound from "./pages/NotFound";
+import EventBatcherWrapper from "../src/lib/eventBatcherWrapper"
 
 const queryClient = new QueryClient();
 
@@ -14,16 +15,16 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/article/:id" element={<NewsDetail />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <EventBatcherWrapper>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/article/:id" element={<NewsDetail />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </EventBatcherWrapper>
     </TooltipProvider>
   </QueryClientProvider>
 );
-
 export default App;

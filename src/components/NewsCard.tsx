@@ -4,10 +4,10 @@ import { Badge } from "@/components/ui/badge";
 import { Clock, User } from "lucide-react";
 
 export interface NewsArticle {
-  id: string;
+  id: number;
   title: string;
   summary: string;
-  content: string;
+  text: string;
   author: string;
   date: string;
   category: string;
@@ -18,9 +18,10 @@ export interface NewsArticle {
 interface NewsCardProps {
   article: NewsArticle;
   onClick: (article: NewsArticle) => void;
+  onLike: (article:NewsArticle)=>void;
 }
 
-export const NewsCard = ({ article, onClick }: NewsCardProps) => {
+export const NewsCard = ({ article, onClick , onLike}: NewsCardProps) => {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -29,11 +30,12 @@ export const NewsCard = ({ article, onClick }: NewsCardProps) => {
       year: 'numeric'
     });
   };
+  // onClick={() => onClick(article)} 
 
   return (
     <Card 
       className="h-full cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-news-shadow/20 hover:bg-news-hover border-border/60 group"
-      onClick={() => onClick(article)}
+     onDoubleClick={()=>onLike(article)}
     >
       {article.imageUrl && (
         <div className="relative overflow-hidden rounded-t-lg">
@@ -76,6 +78,12 @@ export const NewsCard = ({ article, onClick }: NewsCardProps) => {
           <span className="text-sm text-news-subtle">
             {formatDate(article.date)}
           </span>
+          <button
+            onClick={() => onLike(article)}
+            style={{ marginLeft: "10px" }}
+          >
+            ❤️ Like
+          </button>
           
           <Button 
             variant="ghost" 

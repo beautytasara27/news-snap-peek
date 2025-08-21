@@ -5,6 +5,13 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Newspaper } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import axios from "axios";
+import { queueEvent } from "../lib/eventBatcher";
+import { createLike, sendLike, type LikePayload } from "../lib/likeStory";
+import { randomInt } from "crypto";
+import Modal from "./Modal";
+import LoginForm from "./LoginForm";
+import RegisterForm from "./RegisterForm";
+
 
 const Index = () => {
   const navigate = useNavigate();
@@ -12,6 +19,8 @@ const Index = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [loading, setLoading] = useState(true);
+  const [showLogin, setShowLogin] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
 
   // Fetch articles from backend
   useEffect(() => {
@@ -24,7 +33,8 @@ const Index = () => {
             : `http://localhost:5050/api/summaries`;
 
         const response = await axios.get(url);
-        setNewsArticles(response.data);
+        console.log("downloaded stories", response.data.data)
+        setNewsArticles(response.data.data);
       } catch (err) {
         console.error("Error fetching articles", err);
         setNewsArticles([]);
@@ -35,6 +45,7 @@ const Index = () => {
 
     fetchArticles();
   }, [searchTerm]);
+
 
   // Extract category list
   const categories = useMemo(() => {
@@ -54,8 +65,15 @@ const Index = () => {
   }, [newsArticles, selectedCategory]);
 
   const handleArticleClick = (article: NewsArticle) => {
+    queueEvent(10, "click", article.id)
     navigate(`/article/${article.id}`);
   };
+  const handleArticleLike = (article: NewsArticle) => {
+    const like = createLike(10, article.id);
+    console.log("created like", like);
+    sendLike(like);
+  }
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -67,8 +85,8 @@ const Index = () => {
             <h1 className="text-3xl font-bold text-news-header">NewsHub</h1>
           </div>
 
-          {/* Search and Filters */}
-          <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
+          <div className="flex flex-col md:flex-row gap-4 items-center w-full">
+            {/* Left: Search */}
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-news-subtle" />
               <Input
@@ -79,25 +97,42 @@ const Index = () => {
               />
             </div>
 
+            {/* Middle: Categories */}
             <div className="flex gap-2 flex-wrap">
               {categories.map((category) => (
                 <Badge
                   key={category}
                   variant={selectedCategory === category ? "default" : "outline"}
-                  className={`cursor-pointer transition-all duration-200 ${
-                    selectedCategory === category
+                  className={`cursor-pointer transition-all duration-200 ${selectedCategory === category
                       ? "bg-primary text-primary-foreground"
                       : "hover:bg-news-hover"
-                  }`}
+                    }`}
                   onClick={() => setSelectedCategory(category)}
                 >
                   {category}
                 </Badge>
               ))}
             </div>
+
+            {/* Right: Login/Register */}
+            <div className="ml-auto flex gap-2">
+              <button onClick={() => setShowLogin(true)}>Login</button>
+              <button onClick={() => setShowRegister(true)}>Register</button>
+            </div>
           </div>
+
         </div>
       </header>
+
+
+      {/* Modals */}
+      <Modal isOpen={showLogin} onClose={() => setShowLogin(false)}>
+        <LoginForm onSuccess={() => setShowLogin(false)} />
+      </Modal>
+
+      <Modal isOpen={showRegister} onClose={() => setShowRegister(false)}>
+        <RegisterForm onSuccess={() => setShowRegister(false)} />
+      </Modal>
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
@@ -108,7 +143,7 @@ const Index = () => {
               Stay Informed with Latest News
             </h2>
             <p className="text-xl text-news-text leading-relaxed">
-              Discover breaking news, in-depth analysis, and expert insights across technology, 
+              Discover breaking news, in-depth analysis, and expert insights across technology,
               environment, space, and health sectors.
             </p>
           </div>
@@ -143,6 +178,7 @@ const Index = () => {
                     key={article.id}
                     article={article}
                     onClick={handleArticleClick}
+                    onLike={handleArticleLike}
                   />
                 ))}
               </div>
