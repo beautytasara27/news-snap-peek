@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-
+import { useCurrentUser } from "@/hooks/use-curr-user";
 interface RegisterFormProps {
   onSuccess?: () => void;
 }
@@ -10,18 +10,27 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [pageLoading, setLoading] = useState(false);
+  const { user, loading, fetchUser } = useCurrentUser();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post("http://localhost:5050/api/register", {
-        firstName,
-        lastName,
-        email,
-        password,
-      });
+      const response = await axios.post(
+        "http://127.0.0.1:5050/api/register",
+        {
+          firstName,
+          lastName,
+          email,
+          password,
+        },
+        {
+          withCredentials: true, 
+        }
+      );
+      console.log("reg response", response);
+      fetchUser(response.data.token);
       alert("Registered successfully!");
       onSuccess?.();
     } catch (err) {
@@ -70,9 +79,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
       <button
         type="submit"
         className="bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
-        disabled={loading}
+        disabled={pageLoading}
       >
-        {loading ? "Registering..." : "Register"}
+        {pageLoading ? "Registering..." : "Register"}
       </button>
     </form>
   );

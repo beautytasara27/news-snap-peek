@@ -1,3 +1,4 @@
+import axios from "axios";
 type EventData = {
   user_id: number;
   event_type: string;
@@ -8,21 +9,21 @@ type EventData = {
 let eventQueue: EventData[] = [];
 let flushInterval: number | undefined;
 
+
 // Send batched events to backend
-async function flushEvents() {
+async function flushEvents(): Promise<void> {
   if (eventQueue.length === 0) return;
 
   const batch = [...eventQueue];
   eventQueue = [];
 
   try {
-    const res = await fetch("http://localhost:5050/api/events", {
-      method: "POST",
+    const res = await axios.post("http://127.0.0.1:5050/api/events", batch, {
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(batch), // backend expects an array of events directly
+      withCredentials: true, // 👈 send JWT cookie along with request
     });
 
-    if (!res.ok) {
+    if (res.status < 200 || res.status >= 300) {
       console.error("Failed to send event batch");
       eventQueue.push(...batch); // retry later
     }

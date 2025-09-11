@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useCurrentUser } from "@/hooks/use-curr-user";
 
 interface LoginFormProps {
   onSuccess?: () => void;
@@ -8,15 +9,19 @@ interface LoginFormProps {
 const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [pageLoading, setLoading] = useState(false);
+  const {user, loading, fetchUser} = useCurrentUser();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await axios.post("http://localhost:5050/api/login", { email, password });
+      const response = await axios.post("http://127.0.0.1:5050/api/login", { email, password }, {
+        withCredentials: true, 
+      });
       alert("Logged in successfully!");
-      console.log(res);
+      console.log("reg response", response);
+      fetchUser(response.data.token);
       onSuccess?.();
     } catch (err) {
       console.error(err);
@@ -48,9 +53,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
       <button
         type="submit"
         className="bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
-        disabled={loading}
+        disabled={pageLoading}
       >
-        {loading ? "Logging in..." : "Login"}
+        {pageLoading ? "Logging in..." : "Login"}
       </button>
     </form>
   );

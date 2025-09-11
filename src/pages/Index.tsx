@@ -11,6 +11,7 @@ import { randomInt } from "crypto";
 import Modal from "./Modal";
 import LoginForm from "./LoginForm";
 import RegisterForm from "./RegisterForm";
+import {useCurrentUser} from "../hooks/use-curr-user"
 
 
 const Index = () => {
@@ -18,9 +19,10 @@ const Index = () => {
   const [newsArticles, setNewsArticles] = useState<NewsArticle[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
-  const [loading, setLoading] = useState(true);
+  const [loadingPage, setLoading] = useState(true);
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
+  const { user, loading, fetchUser } = useCurrentUser();
 
   // Fetch articles from backend
   useEffect(() => {
@@ -69,7 +71,7 @@ const Index = () => {
     navigate(`/article/${article.id}`);
   };
   const handleArticleLike = (article: NewsArticle) => {
-    const like = createLike(10, article.id);
+    const like = createLike(user.id, article.id);
     console.log("created like", like);
     sendLike(like);
   }
@@ -151,7 +153,7 @@ const Index = () => {
 
         {/* Articles Grid */}
         <section>
-          {loading ? (
+          {loadingPage ? (
             <div className="text-center py-12">Loading...</div>
           ) : filteredArticles.length === 0 ? (
             <div className="text-center py-12">

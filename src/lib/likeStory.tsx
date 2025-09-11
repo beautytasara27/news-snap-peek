@@ -6,7 +6,7 @@ export type LikePayload = {
     timestamp: string; // ISO format
   };
   
-  const LIKE_API_URL = "http://localhost:5050/api/like"; // change to your backend URL
+  const LIKE_API_URL = "http://127.0.0.1:5050/api/like"; // change to your backend URL
   
  
 
