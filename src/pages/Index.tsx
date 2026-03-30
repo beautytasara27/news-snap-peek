@@ -12,7 +12,7 @@ import Modal from "./Modal";
 import LoginForm from "./LoginForm";
 import RegisterForm from "./RegisterForm";
 import {useCurrentUser} from "../hooks/use-curr-user"
-
+import { useAuth } from "../context/AuthContext";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -22,7 +22,8 @@ const Index = () => {
   const [loadingPage, setLoading] = useState(true);
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
-  const { user, loading, fetchUser } = useCurrentUser();
+ // const { user, loading, fetchUser } = useCurrentUser();
+  const { user } = useAuth();
 
   // Fetch articles from backend
   useEffect(() => {
@@ -67,11 +68,11 @@ const Index = () => {
   }, [newsArticles, selectedCategory]);
 
   const handleArticleClick = (article: NewsArticle) => {
-    queueEvent(10, "click", article.id)
+    queueEvent(user?.id, "click", article.id)
     navigate(`/article/${article.id}`);
   };
   const handleArticleLike = (article: NewsArticle) => {
-    const like = createLike(user.id, article.id);
+    const like = createLike(user?.id, article.id);
     console.log("created like", like);
     sendLike(like);
   }

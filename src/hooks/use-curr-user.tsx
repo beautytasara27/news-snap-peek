@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-
+import { useAuth } from "../context/AuthContext";
 
 export interface User {
   id: number;
@@ -17,8 +17,9 @@ interface ApiResponse<T> {
 }
 
 export function useCurrentUser() {
-  const [user, setUser] = useState<User | null>(null);
+//  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const {setUser} = useAuth();
 
   const fetchUser = async (token: string) => {
     setLoading(true);
@@ -27,13 +28,18 @@ export function useCurrentUser() {
         withCredentials: true
       });
       setUser(res.data.data);
+     
+      return res.data.data
     } catch (err) {
       setUser(null);
       console.error("Failed to fetch user", err);
+      
     } finally {
       setLoading(false);
     }
   };
 
-  return { user, loading, fetchUser };
+ 
+
+  return { loading, fetchUser };
 }

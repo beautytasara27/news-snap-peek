@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useCurrentUser } from "@/hooks/use-curr-user";
 
+
 interface LoginFormProps {
   onSuccess?: () => void;
 }
@@ -10,7 +11,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [pageLoading, setLoading] = useState(false);
-  const {user, loading, fetchUser} = useCurrentUser();
+  const {loading, fetchUser} = useCurrentUser();
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
