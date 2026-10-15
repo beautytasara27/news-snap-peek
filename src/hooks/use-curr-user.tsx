@@ -1,45 +1,17 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
-import { useAuth } from "../context/AuthContext";
+import { useAuth, type User } from "@/context/AuthContext";
 
-export interface User {
-  id: number;
-  email: string;
-  firstName: string;
-  lastName: string;
-}
+export type { User };
 
-
-interface ApiResponse<T> {
-  data: T;
-  message: string;
-  success: boolean;
-}
-
+/**
+ * Thin wrapper kept for existing call sites; the session itself lives in
+ * AuthContext so every component sees the same user.
+ */
 export function useCurrentUser() {
-//  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const {setUser} = useAuth();
+  const { user, initializing, refresh } = useAuth();
 
-  const fetchUser = async (token: string) => {
-    setLoading(true);
-    try {
-      const res = await axios.get<ApiResponse<User>>("http://127.0.0.1:5050/api/me", {
-        withCredentials: true
-      });
-      setUser(res.data.data);
-     
-      return res.data.data
-    } catch (err) {
-      setUser(null);
-      console.error("Failed to fetch user", err);
-      
-    } finally {
-      setLoading(false);
-    }
+  return {
+    user,
+    loading: initializing,
+    fetchUser: refresh,
   };
-
- 
-
-  return { loading, fetchUser };
 }

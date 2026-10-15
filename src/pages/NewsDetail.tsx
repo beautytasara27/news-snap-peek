@@ -1,168 +1,187 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Clock, User, Calendar } from "lucide-react";
-import axios from "axios";
+import { ArrowLeft, Calendar, Clock, ExternalLink, UserRound } from "lucide-react";
+import { LikeButton } from "@/components/LikeButton";
+import Modal from "./Modal";
+import LoginForm from "./LoginForm";
+import { errorMessage } from "@/lib/api";
+import { fetchStory, peekFeedSession, type NewsArticle } from "@/lib/stories";
+import type { LikeState } from "@/lib/likeStory";
+import { useAuth } from "@/context/AuthContext";
+import { useArticleDwell } from "@/hooks/use-article-dwell";
 
-export interface NewsArticle {
-  id: string;
-  title: string;
-  summary: string;
-  text: string;
-  author: string;
-  publishedAt: string;
-  category: string;
-  imageUrl?: string;
-  readTime: number;
-}
+export type { NewsArticle };
+
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) return dateString;
+  return date.toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+};
 
 const NewsDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user, initializing } = useAuth();
   const [article, setArticle] = useState<NewsArticle | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showLogin, setShowLogin] = useState(false);
 
   useEffect(() => {
-    if (!id) return;
-  
-    const fetchArticle = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get(`http://localhost:5050/api/summaries/${id}`);
-        console.log("single article", response)
-        setArticle(response.data.data[0]); 
-      } catch (err) {
-        console.error("Error fetching article:", err);
-        setError(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-  
-    fetchArticle();
-  }, [id]);
+    if (!id || initializing) return;
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
+    let active = true;
+    setLoading(true);
+
+    fetchStory(id)
+      .then((story) => {
+        if (!active) return;
+        setArticle(story);
+        setError(null);
+      })
+      .catch((err) => {
+        if (!active) return;
+        console.error("Error fetching article:", err);
+        setError(errorMessage(err, "Article not found"));
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [id, user?.id, initializing]);
+
+  useArticleDwell(article?.id, user?.id, peekFeedSession() ?? undefined);
+
+  const handleLikeChange = (state: LikeState) =>
+    setArticle((current) =>
+      current ? { ...current, likeCount: state.likeCount, likedByMe: state.likedByMe } : current,
+    );
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-xl text-news-subtle">Loading article...</p>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="animate-pulse text-sm text-news-subtle">Loading article…</div>
       </div>
     );
   }
 
   if (error || !article) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-news-header mb-4">
-            Article Not Found
-          </h1>
-          <Button onClick={() => navigate("/")} variant="outline">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to News
-          </Button>
+      <div className="flex min-h-screen items-center justify-center p-6">
+        <div className="glass-card max-w-md p-10 text-center">
+          <h1 className="mb-2 font-display text-2xl text-news-header">Article not found</h1>
+          <p className="mb-6 text-sm text-news-subtle">{error ?? "This story may have been removed."}</p>
+          <Link
+            to="/"
+            className="focus-ring inline-flex items-center gap-2 rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background"
+          >
+            <ArrowLeft className="size-4" />
+            Back to news
+          </Link>
         </div>
       </div>
     );
   }
 
+  const paragraphs = (article.text ?? "")
+    .split(/\n+/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-card border-b border-border/60 sticky top-0 z-50 backdrop-blur-sm bg-card/95">
-        <div className="container mx-auto px-4 py-4">
-          <Button
+    <div className="min-h-screen">
+      <header className="glass-chrome sticky top-0 z-50 border-b">
+        <div className="container mx-auto flex items-center justify-between gap-4 px-4 py-3">
+          <button
+            type="button"
             onClick={() => navigate("/")}
-            variant="ghost"
-            size="sm"
-            className="text-news-text hover:text-primary"
+            className="focus-ring inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium text-news-text transition-colors hover:bg-foreground/[0.06] hover:text-foreground"
           >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to News
-          </Button>
+            <ArrowLeft className="size-4" />
+            Back to news
+          </button>
+
+          <LikeButton
+            storyId={article.id}
+            likeCount={article.likeCount}
+            liked={article.likedByMe}
+            onChange={handleLikeChange}
+            onRequireAuth={() => setShowLogin(true)}
+          />
         </div>
       </header>
 
-      {/* Article Content */}
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="mb-6">
-          <Badge
-            variant="secondary"
-            className="mb-4 bg-primary/10 text-primary"
-          >
-            {article.category}
-          </Badge>
+      <Modal isOpen={showLogin} onClose={() => setShowLogin(false)} title="Welcome back">
+        <LoginForm onSuccess={() => setShowLogin(false)} />
+      </Modal>
 
-          <h1 className="text-4xl md:text-5xl font-bold text-news-header mb-6 leading-tight">
-            {article.title}
-          </h1>
+      <main className="container mx-auto max-w-3xl px-4 pb-24 pt-10">
+        <span className="glass-pill mb-5 px-3 py-1 text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-foreground/90">
+          {article.category}
+        </span>
 
-          <div className="flex flex-wrap items-center gap-6 text-news-subtle border-b border-border/60 pb-6">
-            <div className="flex items-center gap-2">
-              <User size={16} />
-              <span className="font-medium">{article.author}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Calendar size={16} />
-              <span>{formatDate(article.publishedAt)}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Clock size={16} />
-              <span>{article.readTime} min read</span>
-            </div>
-          </div>
+        <h1 className="text-balance font-display text-[2.125rem] font-medium leading-[1.15] text-news-header md:text-[2.875rem]">
+          {article.title}
+        </h1>
+
+        <div className="hairline mt-6 flex flex-wrap items-center gap-x-6 gap-y-3 border-b pb-6 text-sm text-news-subtle">
+          {(article.author || article.source) && (
+            <span className="flex items-center gap-2">
+              <UserRound className="size-4" />
+              <span className="font-medium text-news-text">{article.author || article.source}</span>
+            </span>
+          )}
+          <span className="flex items-center gap-2">
+            <Calendar className="size-4" />
+            {formatDate(article.date)}
+          </span>
+          <span className="flex items-center gap-2">
+            <Clock className="size-4" />
+            {article.readTime} min read
+          </span>
         </div>
 
-        {article.imageUrl && (
-          <div className="mb-8 rounded-lg overflow-hidden shadow-lg">
-            <img
-              src={article.imageUrl}
-              alt={article.title}
-              className="w-full h-64 md:h-96 object-cover"
-            />
-          </div>
+        {article.summary && (
+          <aside className="glass-card mt-8 border-l-2 border-l-primary/70 p-6">
+            <p className="font-serif text-lg leading-relaxed text-news-header">{article.summary}</p>
+          </aside>
         )}
 
-        <div className="mb-8 p-6 bg-muted/50 rounded-lg border-l-4 border-primary">
-          <p className="text-lg text-news-text leading-relaxed font-medium">
-            {article.summary}
-          </p>
+        <div className="prose-reader mt-10">
+          {paragraphs.map((paragraph, index) => (
+            <p key={index}>{paragraph}</p>
+          ))}
         </div>
 
-        <div className="prose prose-lg max-w-none">
-          <div className="text-news-text leading-relaxed text-lg space-y-6">
-            {article.text.split("\n").map((paragraph, index) => (
-              <p key={index} className="leading-relaxed">
-                {paragraph}
-              </p>
-            ))}
-          </div>
-        </div>
+        <div className="hairline mt-12 flex flex-wrap items-center justify-between gap-4 border-t pt-8">
+          <LikeButton
+            storyId={article.id}
+            likeCount={article.likeCount}
+            liked={article.likedByMe}
+            onChange={handleLikeChange}
+            onRequireAuth={() => setShowLogin(true)}
+            size="lg"
+          />
 
-        <div className="mt-12 p-6 bg-gradient-to-r from-primary/5 to-accent/5 rounded-lg border border-border/60">
-          <div className="text-center">
-            <h3 className="text-xl font-semibold text-news-header mb-2">
-              Stay Updated
-            </h3>
-            <p className="text-news-subtle mb-4">
-              Get the latest news and insights delivered straight to your inbox.
-            </p>
-            <Button className="bg-primary hover:bg-primary/90">
-              Subscribe to Newsletter
-            </Button>
-          </div>
+          {article.url && (
+            <a
+              href={article.url}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="focus-ring inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium text-primary transition-colors hover:text-primary/80"
+            >
+              Read the original
+              <ExternalLink className="size-4" />
+            </a>
+          )}
         </div>
       </main>
     </div>

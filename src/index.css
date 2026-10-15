@@ -2,110 +2,78 @@
 @tailwind components;
 @tailwind utilities;
 
-/* News-focused design system with professional colors and typography */
+/* Dark-first editorial design system: deep ink surfaces, a calm azure accent
+   and translucent "liquid glass" panels layered over an ambient gradient. */
 
 @layer base {
-  :root {
-    --background: 0 0% 98%;
-    --foreground: 215 25% 15%;
+  :root,
+  .dark {
+    color-scheme: dark;
 
-    --card: 0 0% 100%;
-    --card-foreground: 215 25% 15%;
+    --background: 225 30% 5%;
+    --foreground: 213 25% 93%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 15%;
+    --card: 222 24% 9%;
+    --card-foreground: 213 25% 93%;
 
-    --primary: 214 95% 45%;
-    --primary-foreground: 0 0% 98%;
+    --popover: 223 26% 10%;
+    --popover-foreground: 213 25% 93%;
 
-    --secondary: 210 20% 96%;
-    --secondary-foreground: 215 25% 25%;
+    --primary: 203 92% 62%;
+    --primary-foreground: 224 40% 8%;
 
-    --muted: 210 15% 95%;
-    --muted-foreground: 215 15% 55%;
+    --secondary: 221 20% 15%;
+    --secondary-foreground: 213 20% 88%;
 
-    --accent: 207 90% 50%;
-    --accent-foreground: 0 0% 98%;
+    --muted: 221 18% 14%;
+    --muted-foreground: 216 14% 64%;
 
-    --destructive: 0 75% 55%;
+    --accent: 265 78% 72%;
+    --accent-foreground: 224 40% 8%;
+
+    --destructive: 2 76% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 210 15% 90%;
-    --input: 210 15% 90%;
-    --ring: 214 95% 45%;
+    --border: 219 18% 20%;
+    --input: 220 18% 17%;
+    --ring: 203 92% 62%;
 
     /* News-specific design tokens */
-    --news-header: 215 30% 8%;
-    --news-text: 215 20% 25%;
-    --news-subtle: 215 10% 65%;
-    --news-hover: 214 95% 95%;
-    --news-shadow: 214 25% 85%;
-    
+    --news-header: 210 30% 97%;
+    --news-text: 214 16% 78%;
+    --news-subtle: 216 13% 58%;
+    --news-hover: 220 22% 16%;
+    --news-shadow: 224 60% 2%;
+    --news-like: 346 86% 64%;
+
+    /* Translucent surfaces (iOS-style) */
+    --glass-tint: 220 40% 70%;
+    --glass-border: 213 30% 92%;
+
     /* Gradients */
-    --gradient-news: linear-gradient(135deg, hsl(214 95% 45%) 0%, hsl(207 90% 50%) 100%);
-    --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(210 20% 98%) 100%);
-    
+    --gradient-news: linear-gradient(135deg, hsl(203 92% 62%) 0%, hsl(265 78% 72%) 100%);
+    --gradient-subtle: linear-gradient(
+      180deg,
+      hsl(220 30% 100% / 0.07) 0%,
+      hsl(220 30% 100% / 0.02) 100%
+    );
+
     /* Typography scale */
     --heading-xl: 2.5rem;
     --heading-lg: 2rem;
     --heading-md: 1.5rem;
     --heading-sm: 1.25rem;
 
-    --radius: 0.5rem;
+    --radius: 1rem;
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 223 26% 9%;
+    --sidebar-foreground: 213 20% 88%;
+    --sidebar-primary: 203 92% 62%;
+    --sidebar-primary-foreground: 224 40% 8%;
+    --sidebar-accent: 221 20% 15%;
+    --sidebar-accent-foreground: 213 20% 88%;
+    --sidebar-border: 219 18% 18%;
+    --sidebar-ring: 203 92% 62%;
   }
 }
 
@@ -114,7 +82,133 @@
     @apply border-border;
   }
 
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* The ambient gradient is what the translucent panels blur - without
+     something colourful behind them, glass just reads as flat grey. */
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+    background-image:
+      radial-gradient(60rem 40rem at 12% -10%, hsl(203 92% 50% / 0.2), transparent 60%),
+      radial-gradient(45rem 35rem at 88% 2%, hsl(265 78% 60% / 0.16), transparent 60%),
+      radial-gradient(50rem 40rem at 50% 108%, hsl(188 80% 45% / 0.12), transparent 60%);
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    font-feature-settings: "cv11", "ss01";
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: hsl(var(--primary) / 0.3);
+    color: hsl(var(--foreground));
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(218 14% 32%);
+    background-clip: content-box;
+  }
+}
+
+@layer components {
+  /* Heavier blur for sticky chrome (header, modals). */
+  .glass-chrome {
+    background-color: hsl(225 30% 7% / 0.72);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border-color: hsl(var(--glass-border) / 0.08);
+  }
+
+  .glass-card {
+    @apply rounded-[1.375rem];
+    background-color: hsl(var(--glass-tint) / 0.06);
+    background-image: var(--gradient-subtle);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid hsl(var(--glass-border) / 0.08);
+    box-shadow:
+      0 1px 0 0 hsl(var(--glass-border) / 0.07) inset,
+      0 18px 40px -24px hsl(var(--news-shadow) / 0.9);
+    transition:
+      transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 420ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 420ms ease,
+      background-color 420ms ease;
+  }
+
+  .glass-card:hover {
+    transform: translateY(-4px);
+    border-color: hsl(var(--glass-border) / 0.16);
+    background-color: hsl(var(--glass-tint) / 0.1);
+    box-shadow:
+      0 1px 0 0 hsl(var(--glass-border) / 0.12) inset,
+      0 32px 60px -28px hsl(var(--news-shadow));
+  }
+
+  .glass-pill {
+    @apply inline-flex items-center gap-1.5 rounded-full;
+    background-color: hsl(var(--glass-tint) / 0.08);
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    border: 1px solid hsl(var(--glass-border) / 0.1);
+  }
+
+  /* Hairline separator that reads well on translucent surfaces. */
+  .hairline {
+    border-color: hsl(var(--glass-border) / 0.08);
+  }
+
+  .text-gradient {
+    background: var(--gradient-news);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+}
+
+@layer utilities {
+  /* Long-form reading column for article bodies. */
+  .prose-reader p {
+    @apply font-serif text-[1.1875rem] leading-[1.85] text-news-text;
+  }
+
+  .prose-reader p + p {
+    @apply mt-6;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .glass-card:hover {
+    transform: none;
   }
 }

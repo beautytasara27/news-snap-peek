@@ -1,64 +1,80 @@
 import React, { useState } from "react";
-import axios from "axios";
-import { useCurrentUser } from "@/hooks/use-curr-user";
-
+import { toast } from "sonner";
+import { AuthField, AuthSubmit } from "@/components/AuthField";
+import { useAuth } from "@/context/AuthContext";
 
 interface LoginFormProps {
   onSuccess?: () => void;
+  onSwitch?: () => void;
 }
 
-const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
+const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitch }) => {
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [pageLoading, setLoading] = useState(false);
-  const {loading, fetchUser} = useCurrentUser();
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setPending(true);
+    setError(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
     try {
-      const response = await axios.post("http://127.0.0.1:5050/api/login", { email, password }, {
-        withCredentials: true, 
-      });
-      alert("Logged in successfully!");
-      console.log("reg response", response);
-      fetchUser(response.data.token);
+      const user = await login({ email, password });
+      toast.success(`Welcome back, ${user.firstName}`);
       onSuccess?.();
     } catch (err) {
-      console.error(err);
-      alert("Login failed");
+      setError(err instanceof Error ? err.message : "Could not sign you in");
     } finally {
-      setLoading(false);
+      setPending(false);
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <h2 className="text-2xl font-semibold text-center">Login</h2>
-      <input
+      <p className="-mt-2 text-sm text-news-subtle">
+        Sign in to like articles and get recommendations tuned to your taste.
+      </p>
+
+      <AuthField
+        label="Email"
         type="email"
-        placeholder="Email"
+        autoComplete="email"
+        placeholder="you@example.com"
         value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="border p-2 rounded"
+        onChange={(event) => setEmail(event.target.value)}
         required
       />
-      <input
+
+      <AuthField
+        label="Password"
         type="password"
-        placeholder="Password"
+        autoComplete="current-password"
+        placeholder="••••••••"
         value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        className="border p-2 rounded"
+        onChange={(event) => setPassword(event.target.value)}
         required
       />
-      <button
-        type="submit"
-        className="bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
-        disabled={pageLoading}
-      >
-        {pageLoading ? "Logging in..." : "Login"}
-      </button>
+
+      {error && (
+        <p role="alert" className="rounded-xl border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          {error}
+        </p>
+      )}
+
+      <AuthSubmit pending={pending} pendingLabel="Signing in...">
+        Sign in
+      </AuthSubmit>
+
+      {onSwitch && (
+        <p className="text-center text-sm text-news-subtle">
+          New here?{" "}
+          <button type="button" onClick={onSwitch} className="focus-ring rounded font-medium text-primary hover:underline">
+            Create an account
+          </button>
+        </p>
+      )}
     </form>
   );
 };

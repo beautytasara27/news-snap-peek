@@ -8,6 +8,14 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    // Proxying keeps API calls same-origin, so the httpOnly auth cookie is
+    // treated as first-party and is actually sent with /api/like requests.
+    proxy: {
+      "/api": {
+        target: process.env.VITE_API_PROXY_TARGET ?? "http://127.0.0.1:5050",
+        changeOrigin: true,
+      },
+    },
   },
   plugins: [
     react(),
