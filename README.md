@@ -1,5 +1,7 @@
-# This is the frontend for my News Summarization Project.
-```This site is hosted [here](https://ngls-plato.netlify.app/).```
+# NewsHub
+
+The frontend for my News Summarization Project. NewsHub turns the day's stories into short, readable summaries across technology, science, business and health. Like the stories that resonate and the **For you** feed learns what you care about, or switch to **Latest** for the newest summaries.
+
 ## Features
 ```
 ❤️ Single Page App
@@ -11,10 +13,10 @@
 React
 Tailwind CSS
 
-## Images
+## Screenshot
 
-![This is an image](/public//home.png)
-![This is an image](/public//article.png)
+![NewsHub home page](public/screenshot.png)
+
 ## Run Locally
 Clone the repo  
 ```
